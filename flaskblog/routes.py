@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for, request
 from flask_login import login_user, current_user, logout_user, login_required
 
 from flaskblog import app, bcrypt, db
@@ -74,7 +74,13 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
-            return redirect(url_for('home'))
+
+            # It allows to the user goes to the required page
+            # after login. The "next" para meter contains the 
+            # page required.
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('home'))
+
         else:
             flash(f'Login unsucessful. Please check email and password',
                   category='danger')
